@@ -1,8 +1,0 @@
-/home/nathanchrs/Progs/news-search/bin/Debug/netcoreapp1.1/news-search.deps.json
-/home/nathanchrs/Progs/news-search/bin/Debug/netcoreapp1.1/news-search.runtimeconfig.json
-/home/nathanchrs/Progs/news-search/bin/Debug/netcoreapp1.1/news-search.runtimeconfig.dev.json
-/home/nathanchrs/Progs/news-search/bin/Debug/netcoreapp1.1/news-search.dll
-/home/nathanchrs/Progs/news-search/bin/Debug/netcoreapp1.1/news-search.pdb
-/home/nathanchrs/Progs/news-search/obj/Debug/netcoreapp1.1/news-search.AssemblyInfo.cs
-/home/nathanchrs/Progs/news-search/obj/Debug/netcoreapp1.1/news-search.dll
-/home/nathanchrs/Progs/news-search/obj/Debug/netcoreapp1.1/news-search.pdb
