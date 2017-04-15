@@ -1,7 +1,77 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
+<div class="row">
+  <div class="col-md-3">
+    <br>
+
+    <form>
+      <div class="form-group">
+        <label for="searchQuery">Search query</label>
+        <input type="text" class="form-control" id="queryText" placeholder="Search...">
+      </div>
+      
+      <label>Search algorithm</label>
+      <div class="radio">
+        <label>
+          <input type="radio" name="searchAlgorithm" id="searchAlgorithmKmp" value="kmp" checked>
+          Knuth-Morris-Pratt algorithm
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="searchAlgorithm" id="searchAlgorithmBoyerMoore" value="boyer-moore" checked>
+          Boyer-Moore algorithm
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="searchAlgorithm" id="searchAlgorithmRegex" value="regex" checked>
+          Regular expressions
+        </label>
+      </div>
+
+      <br>
+      <button type="submit" class="btn btn-primary">Search</button>
+      <br><br>
+    </form>
+
+  </div>
+
+  <div class="col-md-9">
+    <br>
+    <label>Search results</label>
+    
+    <div class="media">
+      <div class="media-left">
+        <a href="#">
+          <img class="media-object" src="~/images/banner1.svg" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h4 class="media-heading">Media heading 1</h4>
+        News article content... 
+      </div>
+    </div>
+
+    <div class="media">
+      <div class="media-left">
+        <a href="#">
+          <img class="media-object" src="~/images/banner2.svg" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h4 class="media-heading">Media heading 2</h4>
+        News article content...
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!--
 <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="6000">
     <ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
@@ -106,3 +176,4 @@
         </ul>
     </div>
 </div>
+-->
