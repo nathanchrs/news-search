@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using news_search.Libs;
+using news_search.Models;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 
 namespace news_search.Controllers
 {
@@ -23,6 +23,12 @@ namespace news_search.Controllers
         public IActionResult Error()
         {
             return View();
+        }
+
+        public async Task<IActionResult> Search(string searchAlgorithm, string queryText)
+        {
+            IEnumerable<Post> postSearch = await SearchAlgorithm.GetAllPost(searchAlgorithm, queryText);
+            return View(postSearch);
         }
     }
 }

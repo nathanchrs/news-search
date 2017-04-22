@@ -42,55 +42,26 @@
   <div class="col-md-9">
     <br>
     <label>Search results</label>
-      <div class="media">
-          <div class="media-left">
-              <a href="#">
-                  <img class="media-object" src="~/images/banner1.svg" alt="">
-              </a>
-          </div>
-          <div class="media-body">
-              <h4 class="media-heading">Media heading 1</h4>
-              News article content...
-          </div>
-      </div>
 
-    <div class="media">
-      <div class="media-left">
-        <a href="#">
-          <img class="media-object" src="~/images/banner1.svg" alt="">
-        </a>
-      </div>
-      <div class="media-body">
-        <h4 class="media-heading">Media heading 1</h4>
-        News article content... 
-      </div>
-    </div>
-
-
-    <div class="media">
-      <div class="media-left">
-        <a href="#">
-          <img class="media-object" src="~/images/banner1.svg" alt="">
-        </a>
-      </div>
-      <div class="media-body">
-        <h4 class="media-heading">Media heading 1</h4>
-        News article content... 
-      </div>
-    </div>
-
-    <div class="media">
-      <div class="media-left">
-        <a href="#">
-          <img class="media-object" src="~/images/banner2.svg" alt="">
-        </a>
-      </div>
-      <div class="media-body">
-        <h4 class="media-heading">Media heading 2</h4>
-        News article content...
-      </div>
-    </div>
-
+      @model IEnumerable<news_search.Models.Post>
+      @foreach (var item in Model)
+      {
+        <div class="media">
+            <div class="media-left">
+                <a href=@item.Link>
+                    <img class="media-object" src="~/images/banner1.svg" alt="">
+                </a>
+            </div>
+            <div class="media-body">
+                <a href=@item.Link>
+                <h4 class="media-heading">@item.Title</h4>
+                </a>
+                @Html.Raw(@item.Description)
+                <br />
+                @item.Content
+            </div>
+        </div>
+      }
   </div>
 
 </div>
