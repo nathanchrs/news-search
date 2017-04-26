@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace news_search.Libs
@@ -131,36 +132,98 @@ namespace news_search.Libs
             }
         }
 
-        public static async Task<IEnumerable<Post>> GetAllPost(string method, string pattern)
+        public static int RegexMatch(String text, String pattern)
+        {
+            String[] patternFormat = pattern.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+            string patternRegex = string.Empty;
+
+            if (patternFormat.Length > 1)
+            {
+                for (int i = 0; i < patternFormat.Length; i++)
+                {
+                    patternRegex += patternFormat[i];
+                    patternRegex += " ";
+                    patternRegex += @"(?<=^|\S*\s*)\S*";
+                }
+            }
+
+            Match match = Regex.Match(text.ToLower(), patternRegex.ToLower(), RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                return match.Index;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        public static async Task<List<Post>> GetAllPost(string method, string pattern)                                   
         {
             var posts = await RssParser.ReadFeedAsync(@"http://rss.detik.com/index.php/detikcom");
-            List<Post> exceptionPost = new List<Post>();
+            List<Post> allPost = new List<Post>(posts.ToList().Count);
+            //List<Post> exceptionPost = new List<Post>();
 
-            foreach (var post in posts)
+            foreach (var post in posts.ToList())
+            {
+                Post temp = new Post();
+                temp.Link = post.Link;
+                temp.Description = post.Description;
+                temp.PublishedDate = post.PublishedDate;
+                temp.Title = post.Title;
+                temp.Content = String.Empty;
+                temp.Content = await HtmlParser.ParsingDetik(temp.Link);
+                allPost.Add(temp);
+
+            }
+
+            for (int idx = allPost.Count - 1; idx >= 0; idx--)
             {
                 if (method.Equals("kmp"))
                 {
-                    //post.Content = await HtmlParser.ParsingDetik(post.Link);
-                    if (KmpMatch(post.Title, pattern) == -1)
+
+                    if (KmpMatch(allPost[idx].Title, pattern) == -1)
                     {
-                        exceptionPost.Add(post);
+                        if (KmpMatch(allPost[idx].Content, pattern) == -1)
+                        {
+                            //exceptionPost.Add(post);
+                            //allPost.Remove(post);
+                            allPost.RemoveAt(idx);
+                        }
                     }
                 }
                 else if (method.Equals("boyer-moore"))
                 {
-                    //post.Content = await HtmlParser.ParsingDetik(post.Link);
-                    if (BmMatch(post.Title, pattern) == -1)
+
+                    if (BmMatch(allPost[idx].Title, pattern) == -1)
                     {
-                        exceptionPost.Add(post);
+                        if (BmMatch(allPost[idx].Content, pattern) == -1)
+                        {
+                            //exceptionPost.Add(post);
+                            //allPost.Remove(post);
+                            allPost.RemoveAt(idx);
+                        }
                     }
+
                 }
                 else
                 {
-                    // regex implementation
+
+                    if (RegexMatch(allPost[idx].Title, pattern) == -1)
+                    {
+                        if (RegexMatch(allPost[idx].Content, pattern) == -1)
+                        {
+                            //allPost.Remove(post);
+                            //exceptionPost.Add(post);
+                            allPost.RemoveAt(idx);
+                        }
+                    }
+
                 }
             }
 
-            return posts.Except(exceptionPost);
+            //return allPost.Remove(exceptionPost);
+            return allPost;
         }
     }
 }

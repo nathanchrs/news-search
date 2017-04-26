@@ -27,8 +27,7 @@ namespace news_search.Controllers
 
         public async Task<IActionResult> Search(string searchAlgorithm, string queryText)
         {
-            IEnumerable<Post> postSearch = await SearchAlgorithm.GetAllPost(searchAlgorithm, queryText);
-            return View(postSearch);
+            return View(await SearchAlgorithm.GetAllPost(searchAlgorithm, queryText));
         }
     }
 }

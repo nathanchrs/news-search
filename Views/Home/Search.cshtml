@@ -43,7 +43,7 @@
     <br>
     <label>Search results</label>
 
-      @model IEnumerable<news_search.Models.Post>
+      @model List<news_search.Models.Post>
       @foreach (var item in Model)
       {
         <div class="media">
@@ -56,7 +56,7 @@
                 <a href=@item.Link>
                 <h4 class="media-heading">@item.Title</h4>
                 </a>
-                @Html.Raw(@item.Description)
+                Description : @Html.Raw(@item.Description)
                 <br />
                 @item.Content
             </div>
