@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using news_search.Libs;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using news_search.Models;
 
 namespace news_search.Controllers
 {
@@ -14,7 +16,6 @@ namespace news_search.Controllers
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
-
             return View();
         }
 
@@ -25,7 +26,10 @@ namespace news_search.Controllers
 
         public async Task<IActionResult> Search(string searchAlgorithm, string queryText)
         {
-            return View(await SearchAlgorithm.GetAllPost(searchAlgorithm, queryText));
+            var posts = new List<Post>(await RssParser.ReadFeedsAsync());
+            await HtmlParser.FetchPostContents(posts);
+            SearchAlgorithm.FilterPosts(posts, queryText, searchAlgorithm);
+            return View(posts);
         }
     }
 }

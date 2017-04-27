@@ -6,8 +6,8 @@ namespace news_search.Models
         public string PublishedDate { set; get; }
         public string Description { set; get; }
         public string Link { set; get; }
-        public string ImageLink { set; get; }
         public string Title { set; get; }
         public string Content { set; get; }
+        public string RssSource { set; get; }
     }
 }

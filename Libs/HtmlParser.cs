@@ -10,25 +10,20 @@ using news_search.Models;
 namespace news_search.Libs
 {
     public class HtmlParser
-    {
-        private static async Task<HtmlDocument> FetchHtmlDocument(String url)
-        {
-            HtmlDocument document = new HtmlDocument();
-            try {
-                
-                using (HttpClient client = new HttpClient())
-                using (HttpResponseMessage response = await client.GetAsync(url))
-                using (HttpContent content = response.Content)
-                {
-                    string result = await content.ReadAsStringAsync();
-                    document.LoadHtml(result);
-                }
-            } catch (Exception) {
-                Console.WriteLine("[DEBUG] Failed to fetch HTML for URL " + url);
+    {  
+        // Fetch and parse content in parallel for a list of posts; fill their content values.
+        public static async Task FetchPostContents(IEnumerable<Post> posts) {
+            // Fetch HTML documents for each post in parallel
+            var fetchTasks = new Task[posts.Count()];
+            int i = 0;
+            foreach (var post in posts) {
+                fetchTasks[i] = FetchPostContent(post);
+                i++;
             }
-            return document;
+            await Task.WhenAll(fetchTasks);
         }
 
+        // Fetch and parse content of a post; fill its content value.
         private static async Task FetchPostContent(Post post)
         {
             HtmlDocument document = new HtmlDocument();
@@ -45,23 +40,19 @@ namespace news_search.Libs
                 Console.WriteLine("[DEBUG] Failed to fetch HTML for URL " + post.Link);
             }
             
-            post.Content = ParsingDetik(document);
-        }
-
-        // Fetch and parse content in parallel for a list of posts; fill their content values.
-        public static async Task FetchPostContents(IEnumerable<Post> posts) {
-            // Fetch HTML documents for each post in parallel
-            var fetchTasks = new Task[posts.Count()];
-            int i = 0;
-            foreach (var post in posts) {
-                fetchTasks[i] = FetchPostContent(post);
-                i++;
+            try {
+                ParseHTML(post, document);
+            } catch (Exception) {
+                Console.WriteLine("[DEBUG] Failed to parse HTML for URL " + post.Link);
             }
-            await Task.WhenAll(fetchTasks);
         }
 
+        private static void ParseHTML(Post post, HtmlDocument document) {
+            // DEBUG
+            post.Content = "huehuehue";
+        }
 
-        public static void RemoveComments(HtmlNode node)
+        private static void RemoveComments(HtmlNode node)
         {
             foreach (var n in node.ChildNodes.ToArray())
                 RemoveComments(n);
@@ -69,9 +60,9 @@ namespace news_search.Libs
                 node.Remove();
         }
         
-        public static String ParsingDetik(HtmlDocument node, String type = "")
+        public static String ParsingDetik(HtmlDocument document, String type = "")
         {
-            var root = node.DocumentNode;
+            var root = document.DocumentNode;
 
             RemoveComments(root);
 
