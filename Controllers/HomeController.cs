@@ -29,11 +29,7 @@ namespace news_search.Controllers
             ViewData["searchAlgorithm"] = searchAlgorithm;
             ViewData["queryText"] = queryText;
 
-            // DEBUG: Make debugging faster
-            // WARNING!!!: remove limit at run time
-            int postCountLimit = 5;
-
-            var posts = new List<Post>(await RssParser.ReadFeedsAsync(postCountLimit));
+            var posts = new List<Post>(await RssParser.ReadFeedsAsync());
             await HtmlParser.FetchPostContents(posts);
             SearchAlgorithm.FilterPosts(posts, queryText, searchAlgorithm);
             return View(posts);

@@ -14,13 +14,13 @@ namespace news_search.Libs
         // RSS URLs to load content from.
         public static readonly Dictionary<string, string> rssSources = new Dictionary<string, string> {
             {"Detik", @"http://rss.detik.com/index.php/detikcom"},
-            {"Viva News", @"http://rss.vivanews.com/get/all"},
+            {"Viva", @"http://rss.vivanews.com/get/all"},
             {"Tempo", @"http://tempo.co/rss/terkini"},
             {"Antara", @"http://www.antaranews.com/rss/terkini"}
         };
 
         // Load posts by querying the specified RSS fields.
-        public static async Task<IEnumerable<Post>> ReadFeedsAsync(int limit = 1000)
+        public static async Task<IEnumerable<Post>> ReadFeedsAsync()
         {
             var posts = new List<Post>();
             foreach (var rssSourceName in rssSources.Keys) {
@@ -38,12 +38,7 @@ namespace news_search.Libs
                                         PublishedDate = item.Element("pubDate").Value,
                                         RssSource = rssSourceName
                                     };
-                    posts.AddRange(newPosts);
-
-                    if (posts.Count > limit) {
-                        System.Console.WriteLine("[DEBUG] Reached post fetch limit at " + limit + " posts");
-                        break;
-                    }                  
+                    posts.AddRange(newPosts);               
                 }
                 catch (System.Exception) {
                     System.Console.WriteLine("[WARNING] Failed to read RSS XML from " + rssSourceName);

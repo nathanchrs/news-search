@@ -41,15 +41,26 @@ namespace news_search.Libs
             }
             
             try {
-                ParseHTML(post, document);
+                ParseHtml(post, document);
             } catch (Exception) {
                 Console.WriteLine("[DEBUG] Failed to parse HTML for URL " + post.Link);
             }
         }
 
-        private static void ParseHTML(Post post, HtmlDocument document) {
-            // DEBUG
-            post.Content = "huehuehue";
+        private static void ParseHtml(Post post, HtmlDocument document) {
+            // Remove comments
+            RemoveComments(document.DocumentNode);
+
+            // Parse specific HTML
+            if (post.RssSource == "Detik") {
+                //ParseHtmlDetik(post, document);
+            } else if (post.RssSource == "Viva") {
+                //ParseHtmlViva(post, document);
+            } else if (post.RssSource == "Antara") {
+                //ParseHtmlAntara(post, document);
+            } else if (post.RssSource == "Tempo") {
+                //ParseHtmlTempo(post, document);
+            }
         }
 
         private static void RemoveComments(HtmlNode node)
@@ -59,12 +70,15 @@ namespace news_search.Libs
             if (node.NodeType == HtmlNodeType.Comment)
                 node.Remove();
         }
+
+
+
+
+        /// OLD CODE ///
         
         public static String ParsingDetik(HtmlDocument document, String type = "")
         {
             var root = document.DocumentNode;
-
-            RemoveComments(root);
 
             root.Descendants()
                 .Where(n => n.Name == "script" || n.Name == "style" || n.Name == "iframe" || n.Name == "span" || n.Name == "br")
