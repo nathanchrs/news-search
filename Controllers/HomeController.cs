@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using news_search.Libs;
-using news_search.Models;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace news_search.Controllers

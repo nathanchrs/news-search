@@ -1,27 +1,65 @@
 ﻿using HtmlAgilityPack;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using news_search.Models;
 
 namespace news_search.Libs
 {
     public class HtmlParser
     {
-        private static async Task<HtmlDocument> Parsing(String website)
+        private static async Task<HtmlDocument> FetchHtmlDocument(String url)
         {
             HtmlDocument document = new HtmlDocument();
-            using (HttpClient client = new HttpClient())
-            using (HttpResponseMessage response = await client.GetAsync(website))
-            using (HttpContent content = response.Content)
-            {
-                string result = await content.ReadAsStringAsync();
-                document.LoadHtml(result);
+            try {
+                
+                using (HttpClient client = new HttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(url))
+                using (HttpContent content = response.Content)
+                {
+                    string result = await content.ReadAsStringAsync();
+                    document.LoadHtml(result);
+                }
+            } catch (Exception) {
+                Console.WriteLine("[DEBUG] Failed to fetch HTML for URL " + url);
             }
             return document;
         }
+
+        private static async Task FetchPostContent(Post post)
+        {
+            HtmlDocument document = new HtmlDocument();
+            try {
+                
+                using (HttpClient client = new HttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(post.Link))
+                using (HttpContent content = response.Content)
+                {
+                    string result = await content.ReadAsStringAsync();
+                    document.LoadHtml(result);
+                }
+            } catch (Exception) {
+                Console.WriteLine("[DEBUG] Failed to fetch HTML for URL " + post.Link);
+            }
+            
+            post.Content = ParsingDetik(document);
+        }
+
+        // Fetch and parse content in parallel for a list of posts; fill their content values.
+        public static async Task FetchPostContents(IEnumerable<Post> posts) {
+            // Fetch HTML documents for each post in parallel
+            var fetchTasks = new Task[posts.Count()];
+            int i = 0;
+            foreach (var post in posts) {
+                fetchTasks[i] = FetchPostContent(post);
+                i++;
+            }
+            await Task.WhenAll(fetchTasks);
+        }
+
 
         public static void RemoveComments(HtmlNode node)
         {
@@ -30,12 +68,9 @@ namespace news_search.Libs
             if (node.NodeType == HtmlNodeType.Comment)
                 node.Remove();
         }
-
-
-        public static async Task<String> ParsingDetik(String website, String type = "")
+        
+        public static String ParsingDetik(HtmlDocument node, String type = "")
         {
-            var node = await Parsing(website);
-
             var root = node.DocumentNode;
 
             RemoveComments(root);
@@ -82,10 +117,8 @@ namespace news_search.Libs
         }
 
 
-        public static async Task<String> ParsingTempo(String website, String type = "")
+        public static String ParsingTempo(HtmlDocument node, String type = "")
         {
-            var node = await Parsing(website);
-
             var root = node.DocumentNode;
 
             /**

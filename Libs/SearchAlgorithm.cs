@@ -1,8 +1,6 @@
 ﻿using news_search.Models;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -157,26 +155,9 @@ namespace news_search.Libs
 
         public static async Task<List<Post>> GetAllPost(string method, string pattern)                                   
         {
-            var posts = await RssParser.ReadFeedAsync(@"http://rss.detik.com/");
-            List<Post> allPost = new List<Post>(posts.ToList().Count);
-            //List<Post> filteredPost = new List<Post>(posts.ToList().Count);
-            
-            foreach (var post in posts.ToList())
-            {
-                Post temp = new Post()
-                {
-                    Link = post.Link,
-                    Description = post.Description,
-                    PublishedDate = post.PublishedDate,
-                    Title = post.Title,
-                    Content = String.Empty
-                };
-                temp.Content = await HtmlParser.ParsingDetik(temp.Link);
-                allPost.Add(temp);
-            }
+            var allPost = new List<Post>(await RssParser.ReadFeedsAsync());
+            await HtmlParser.FetchPostContents(allPost);
 
-
-            
             for (int idx = 0; idx < allPost.Count; idx++)
             {
                 if (method.Equals("kmp"))
