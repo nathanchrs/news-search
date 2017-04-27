@@ -12,35 +12,35 @@ namespace news_search.Libs
     {
         private static int KmpMatch(String text, String pattern)
         {
-            int n = text.Length;
-            int m = pattern.Length;
+                int n = text.Length;
+                int m = pattern.Length;
 
-            int[] fail = ComputeFail(pattern);
+                int[] fail = ComputeFail(pattern);
 
-            int i = 0;
-            int j = 0;
+                int i = 0;
+                int j = 0;
 
-            while (i < n)
-            {
-                if (pattern[j] == text[i])
+                while (i < n)
                 {
-                    if (j == m - 1)
+                    if (pattern[j] == text[i])
                     {
-                        return i - m + 1;
+                        if (j == m - 1)
+                        {
+                            return i - m + 1;
+                        }
+                        i++;
+                        j++;
                     }
-                    i++;
-                    j++;
+                    else if (j > 0)
+                    {
+                        j = fail[j - 1];
+                    }
+                    else
+                    {
+                        i++;
+                    }
                 }
-                else if (j > 0)
-                {
-                    j = fail[j - 1];
-                }
-                else
-                {
-                    i++;
-                }
-            }
-            return -1;
+                return -1;
         }
 
         private static int[] ComputeFail(String pattern)
@@ -92,92 +92,92 @@ namespace news_search.Libs
 
         private static int BmMatch(String text, String pattern)
         {
-            int[] last = BuildLast(pattern);
+                int[] last = BuildLast(pattern);
 
-            int n = text.Length;
-            int m = pattern.Length;
+                int n = text.Length;
+                int m = pattern.Length;
 
-            int i = m - 1;
+                int i = m - 1;
 
-            if (i > n - 1)
-            {
-                return -1;
-            }
-            else
-            {
-                int j = m - 1;
-                do
+                if (i > n - 1)
                 {
-                    if (pattern[j] == text[i])
+                    return -1;
+                }
+                else
+                {
+                    int j = m - 1;
+                    do
                     {
-                        if (j == 0)
+                        if (pattern[j] == text[i])
                         {
-                            return i;
+                            if (j == 0)
+                            {
+                                return i;
+                            }
+                            else
+                            {
+                                i--;
+                                j--;
+                            }
                         }
                         else
                         {
-                            i--;
-                            j--;
+                            int lo = last[text[i]];
+                            i = i + m - Math.Min(j, 1 + lo);
+                            j = m - 1;
                         }
-                    }
-                    else
-                    {
-                        int lo = last[text[i]];
-                        i = i + m - Math.Min(j, 1 + lo);
-                        j = m - 1;
-                    }
-                } while (i <= n - 1);
+                    } while (i <= n - 1);
 
-                return -1;
-            }
+                    return -1;
+                }
         }
 
         public static int RegexMatch(String text, String pattern)
         {
-            String[] patternFormat = pattern.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
             string patternRegex = string.Empty;
-
-            if (patternFormat.Length > 1)
-            {
-                for (int i = 0; i < patternFormat.Length; i++)
+                String[] patternFormat = pattern.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+                if (patternFormat.Length > 1)
                 {
-                    patternRegex += patternFormat[i];
-                    patternRegex += " ";
-                    patternRegex += @"(?<=^|\S*\s*)\S*";
+                    for (int i = 0; i < patternFormat.Length; i++)
+                    {
+                        patternRegex += patternFormat[i];
+                        patternRegex += @" .* ";
+                    }
                 }
-            }
-
-            Match match = Regex.Match(text.ToLower(), patternRegex.ToLower(), RegexOptions.IgnoreCase);
-            if (match.Success)
-            {
-                return match.Index;
-            }
-            else
-            {
-                return -1;
-            }
+                Match match = Regex.Match(text.ToLower(), patternRegex.ToLower(), RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    return match.Index;
+                }
+                else
+                {
+                    return -1;
+                } 
         }
 
         public static async Task<List<Post>> GetAllPost(string method, string pattern)                                   
         {
-            var posts = await RssParser.ReadFeedAsync(@"http://rss.detik.com/index.php/detikcom");
+            var posts = await RssParser.ReadFeedAsync(@"http://rss.detik.com/");
             List<Post> allPost = new List<Post>(posts.ToList().Count);
-            //List<Post> exceptionPost = new List<Post>();
-
+            //List<Post> filteredPost = new List<Post>(posts.ToList().Count);
+            
             foreach (var post in posts.ToList())
             {
-                Post temp = new Post();
-                temp.Link = post.Link;
-                temp.Description = post.Description;
-                temp.PublishedDate = post.PublishedDate;
-                temp.Title = post.Title;
-                temp.Content = String.Empty;
+                Post temp = new Post()
+                {
+                    Link = post.Link,
+                    Description = post.Description,
+                    PublishedDate = post.PublishedDate,
+                    Title = post.Title,
+                    Content = String.Empty
+                };
                 temp.Content = await HtmlParser.ParsingDetik(temp.Link);
                 allPost.Add(temp);
-
             }
 
-            for (int idx = allPost.Count - 1; idx >= 0; idx--)
+
+            
+            for (int idx = 0; idx < allPost.Count; idx++)
             {
                 if (method.Equals("kmp"))
                 {
@@ -221,9 +221,60 @@ namespace news_search.Libs
 
                 }
             }
+            
+            /*
+            foreach (var post in allPost)
+            {
+                if (method.Equals("kmp"))
+                {
+
+                    if (KmpMatch(post.Title, pattern) != -1)
+                    {
+                        if (KmpMatch(post.Content, pattern) != -1)
+                        {
+                            //exceptionPost.Add(post);
+                            //allPost.Remove(post);
+                            //allPost.RemoveAt(idx);
+                            filteredPost.Add(post);
+                        }
+                    }
+                }
+                else if (method.Equals("boyer-moore"))
+                {
+
+                    if (BmMatch(post.Title, pattern) != -1)
+                    {
+                        if (BmMatch(post.Content, pattern) != -1)
+                        {
+                            //exceptionPost.Add(post);
+                            //allPost.Remove(post);
+                            //allPost.RemoveAt(idx);
+                            filteredPost.Add(post);
+                        }
+                    }
+
+                }
+                else
+                {
+
+                    if (RegexMatch(post.Title, pattern) != -1)
+                    {
+                        if (RegexMatch(post.Content, pattern) != -1)
+                        {
+                            //allPost.Remove(post);
+                            //exceptionPost.Add(post);
+                            //allPost.RemoveAt(idx);
+                            filteredPost.Add(post);
+                        }
+                    }
+
+                }
+            }
+            */
 
             //return allPost.Remove(exceptionPost);
             return allPost;
+            //return filteredPost;
         }
     }
 }
