@@ -15,7 +15,6 @@ namespace news_search.Controllers
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
             return View();
         }
 
@@ -26,7 +25,15 @@ namespace news_search.Controllers
 
         public async Task<IActionResult> Search(string searchAlgorithm, string queryText)
         {
-            var posts = new List<Post>(await RssParser.ReadFeedsAsync());
+            // Return these values to the view so that the view would not be reset after every search.
+            ViewData["searchAlgorithm"] = searchAlgorithm;
+            ViewData["queryText"] = queryText;
+
+            // DEBUG: Make debugging faster
+            // WARNING!!!: remove limit at run time
+            int postCountLimit = 5;
+
+            var posts = new List<Post>(await RssParser.ReadFeedsAsync(postCountLimit));
             await HtmlParser.FetchPostContents(posts);
             SearchAlgorithm.FilterPosts(posts, queryText, searchAlgorithm);
             return View(posts);

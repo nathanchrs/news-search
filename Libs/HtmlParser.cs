@@ -36,7 +36,7 @@ namespace news_search.Libs
                     string result = await content.ReadAsStringAsync();
                     document.LoadHtml(result);
                 }
-            } catch (Exception) {
+            } catch (Exception e) {
                 Console.WriteLine("[DEBUG] Failed to fetch HTML for URL " + post.Link);
             }
             

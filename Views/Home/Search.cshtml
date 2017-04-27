@@ -1,5 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Home";
+    if (ViewData["searchAlgorithm"] == null) {
+        ViewData["searchAlgorithm"] = "regex";
+    }
 }
 
 <div class="row">
@@ -9,7 +12,7 @@
       <form action="/Home/Search" method="get">
           <div class="form-group">
               <label for="searchQuery">Search query</label>
-              <input type="text" class="form-control" name="queryText" id="queryText" placeholder="Search...">
+              <input type="text" class="form-control" name="queryText" id="queryText" placeholder="Search..." required value='@ViewData["queryText"]'>
           </div>
 
           <label>Search algorithm</label>
@@ -58,7 +61,10 @@
                     <a href=@item.Link>
                         <h4 class="media-heading">@item.Title</h4>
                     </a>
-                    Description : @Html.Raw(@item.Description)
+                    <span class="label label-primary">@item.RssSource</span>
+                    <span class="label label-default">@item.Location</span> <a href="http://maps.google.com?q=@item.Location">Open in map</a>
+                    <br />
+                    <i>@Html.Raw(@item.Description)</i>
                     <br />
                     @item.Content
                 </div>

@@ -119,13 +119,13 @@ namespace news_search.Libs
             // Remove posts from the back to prevent index problems
             for (int idx = posts.Count - 1; idx >= 0; idx--) {
                 if (method.Equals("kmp")
-                    && KmpMatch(posts[idx].Title, pattern) == -1
-                    && KmpMatch(posts[idx].Content, pattern) == -1) {
+                    && KmpMatch(posts[idx].Title.ToLower(), pattern.ToLower()) == -1
+                    && KmpMatch(posts[idx].Content.ToLower(), pattern.ToLower()) == -1) {
                     
                     posts.RemoveAt(idx);
                 } else if (method.Equals("boyer-moore")
-                    && BmMatch(posts[idx].Title, pattern) == -1
-                    && BmMatch(posts[idx].Content, pattern) == -1) {
+                    && BmMatch(posts[idx].Title.ToLower(), pattern.ToLower()) == -1
+                    && BmMatch(posts[idx].Content.ToLower(), pattern.ToLower()) == -1) {
                     
                     posts.RemoveAt(idx);
                 } else if (method.Equals("regex")
