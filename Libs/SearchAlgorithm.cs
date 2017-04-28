@@ -141,7 +141,7 @@ namespace news_search.Libs
                     titleIdx = RegexMatch(posts[idx].Title, pattern);
                     contentIdx = RegexMatch(posts[idx].Content, pattern);
                 }
-                
+
                 if (titleIdx != -1) {
                     posts[idx].RelevantContent = posts[idx].Title;
                 } else if (contentIdx != -1) {
