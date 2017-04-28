@@ -115,25 +115,40 @@ namespace news_search.Libs
             } 
         }
 
+        private static string ExtractSentence(string text, int around) {
+            string sentence = "";
+            if (text != null && text != "") {
+                int start = Math.Max(around - 30, 0);
+                int end = Math.Min(around + 30, text.Length-1);
+                sentence = text.Substring(start, end-start+1);
+            }
+            return sentence;
+        }
+
         public static void FilterPosts(List<Post> posts, string pattern, string method = "kmp") {
             // Remove posts from the back to prevent index problems
             for (int idx = posts.Count - 1; idx >= 0; idx--) {
-                if (method.Equals("kmp")
-                    && KmpMatch(posts[idx].Title.ToLower(), pattern.ToLower()) == -1
-                    && KmpMatch(posts[idx].Content.ToLower(), pattern.ToLower()) == -1) {
-                    
-                    posts.RemoveAt(idx);
-                } else if (method.Equals("boyer-moore")
-                    && BmMatch(posts[idx].Title.ToLower(), pattern.ToLower()) == -1
-                    && BmMatch(posts[idx].Content.ToLower(), pattern.ToLower()) == -1) {
-                    
-                    posts.RemoveAt(idx);
-                } else if (method.Equals("regex")
-                    && RegexMatch(posts[idx].Title, pattern) == -1
-                    && RegexMatch(posts[idx].Content, pattern) == -1) {
-                    
+                int titleIdx = -1;
+                int contentIdx = -1;
+                if (method == "kmp") {
+                    titleIdx = KmpMatch(posts[idx].Title.ToLower(), pattern.ToLower());
+                    contentIdx = KmpMatch(posts[idx].Content.ToLower(), pattern.ToLower());
+                } else if (method == "boyer-moore") {
+                    titleIdx = BmMatch(posts[idx].Title.ToLower(), pattern.ToLower());
+                    contentIdx = BmMatch(posts[idx].Content.ToLower(), pattern.ToLower());
+                } else if (method == "regex") {
+                    titleIdx = RegexMatch(posts[idx].Title, pattern);
+                    contentIdx = RegexMatch(posts[idx].Content, pattern);
+                }
+                
+                if (titleIdx == -1) {
+                    posts[idx].RelevantContent = posts[idx].Title;
+                } else if (contentIdx == -1) {
+                    posts[idx].RelevantContent = ExtractSentence(posts[idx].Content, contentIdx);
+                } else {
                     posts.RemoveAt(idx);
                 }
+
             }
         }
 
