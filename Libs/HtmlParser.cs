@@ -53,13 +53,13 @@ namespace news_search.Libs
 
             // Parse specific HTML
             if (post.RssSource == "Detik") {
-                //ParseHtmlDetik(post, document);
+                ParseHtmlDetik(post, document);
             } else if (post.RssSource == "Viva") {
-                //ParseHtmlViva(post, document);
+                ParseHtmlViva(post, document);
             } else if (post.RssSource == "Antara") {
-                //ParseHtmlAntara(post, document);
+                ParseHtmlAntara(post, document);
             } else if (post.RssSource == "Tempo") {
-                //ParseHtmlTempo(post, document);
+                ParseHtmlTempo(post, document);
             }
         }
 
@@ -74,9 +74,7 @@ namespace news_search.Libs
 
 
 
-        /// OLD CODE ///
-        
-        public static String ParsingDetik(HtmlDocument document, String type = "")
+        public static void ParseHtmlDetik(Post post, HtmlDocument document)
         {
             var root = document.DocumentNode;
 
@@ -85,69 +83,42 @@ namespace news_search.Libs
                 .ToList()
                 .ForEach(n => n.Remove());
 
-            if (type.Equals("title"))
-            {
-                var title = root.Descendants("div")
-                    .Where(n => n.GetAttributeValue("class", "").Equals("jdl"))
-                    .Single()
-                    .Descendants("h1")
-                    .Single();
-                return title.InnerText;
-            }
-            else if (type.Equals("date"))
-            {
-                var date = root.Descendants("div")
-                    .Where(n => n.GetAttributeValue("class", "jdl").Equals("date"))
-                    .Single();
-                return date.InnerText;
-            }
-            else if (type.Equals("location"))
-            {
-                var location = root.Descendants()
-                    .Where(n => n.GetAttributeValue("class", "").Equals("detail_text"))
-                    .Single()
-                    .Descendants("b")
-                    .Single();
-                return location.InnerText;
-            }
-            else
-            {
-                var paragraph = root.Descendants()
-                    .Where(n => n.GetAttributeValue("class", "").Equals("detail_text"))
-                    .Single();
-
-                String content = Regex.Replace(paragraph.InnerText, @"\s+", " ");
-                return content.Trim();
-            }
-        }
-
-
-        public static String ParsingTempo(HtmlDocument node, String type = "")
-        {
-            var root = node.DocumentNode;
-
-            /**
-            root.Descendants()
-                .Where(n => n.Name == "script" || n.Name == "style" || n.Name == "iframe" || n.Name == "span" || n.Name == "br" || n.Name == "ul")
-                .ToList()
-                .ForEach(n => n.Remove());
-
-            var date = root.Descendants("div")
-                .Where(n => n.GetAttributeValue("class", "jdl").Equals("date"))
-                .Single();
-
             var title = root.Descendants("div")
                 .Where(n => n.GetAttributeValue("class", "").Equals("jdl"))
                 .Single()
                 .Descendants("h1")
                 .Single();
 
+            post.Title = title.InnerText;
+
+
+            var date = root.Descendants("div")
+                .Where(n => n.GetAttributeValue("class", "jdl").Equals("date"))
+                .Single();
+
+            post.PublishedDate = date.InnerText;
+
             var location = root.Descendants()
                 .Where(n => n.GetAttributeValue("class", "").Equals("detail_text"))
                 .Single()
                 .Descendants("b")
                 .Single();
-            **/
+            post.Location = location.InnerText;
+
+
+            var paragraph = root.Descendants()
+                .Where(n => n.GetAttributeValue("class", "").Equals("detail_text"))
+                .Single();
+
+            String content = Regex.Replace(paragraph.InnerText, @"\s+", " ");
+            post.Content = content.Trim();
+
+        }
+
+
+        public static void ParseHtmlTempo(Post post, HtmlDocument node)
+        {
+            var root = node.DocumentNode;
 
             var paragraph = root.SelectNodes("//div[@class='artikel']/p/text()");
 
@@ -166,20 +137,75 @@ namespace news_search.Libs
                     .ToList()
                     .ForEach(n => n.Remove());
 
+                
                 par.Descendants("em")
                     .Where(n => n.Name == "strong")
+                    .ToList()
+                    .ForEach(n => n.Remove());
+                
+                content += HtmlEntity.DeEntitize(par.InnerText);
+            }
+
+            content = Regex.Replace(content, @"\s+", " ");
+            var location = content.Split(' ')[1];
+            post.Location = location;
+            post.Content = content;
+        }
+
+        public static void ParseHtmlViva(Post post, HtmlDocument node)
+        {
+            var root = node.DocumentNode;
+            
+            var par2 = root.Descendants()
+                .Where(n => n.GetAttributeValue("itemprop", "").Equals("description"))
+                .Single()
+                .Descendants("p")
+                .ToList();
+
+            String content = "";
+
+            foreach (var par in par2)
+            {
+                par.Descendants()
+                    .Where(n => n.Name == "a")
                     .ToList()
                     .ForEach(n => n.Remove());
                 content += HtmlEntity.DeEntitize(par.InnerText);
             }
 
             content = Regex.Replace(content, @"\s+", " ");
-            return content;
-            //Console.WriteLine(date.InnerText);
-            // Console.WriteLine(judul.InnerText);
-            //Console.WriteLine(location.InnerText);
-            //Console.WriteLine(content);
+            post.Content = content;
+        }
 
+        public static void ParseHtmlAntara(Post post, HtmlDocument node)
+        {
+            var root = node.DocumentNode;
+
+            var par2 = root.Descendants()
+                .Where(n => n.GetAttributeValue("itemprop", "").Equals("articleBody"))
+                .Single()
+                .Descendants("div")
+                .ToList();
+
+            String content = "";
+
+            foreach (var par in par2)
+            {
+                par.Descendants()
+                    .Where(n => n.Name == "a" ||n.Name == "script")
+                    .ToList()
+                    .ForEach(n => n.Remove());
+
+                content += HtmlEntity.DeEntitize(par.InnerText);
+            }
+
+            content = Regex.Replace(content, @"\s+", " ");
+            content.Replace("(adsbygoogle = window.adsbygoogle || []).push({});", "");
+            var location = content.IndexOf(" ") > -1
+                  ? content.Substring(0, content.IndexOf(" "))
+                  : content;
+            post.Location = location;
+            post.Content = content;
         }
     }
 }

@@ -62,7 +62,10 @@
                         <h4 class="media-heading">@item.Title</h4>
                     </a>
                     <span class="label label-primary">@item.RssSource</span>
-                    <span class="label label-default">@item.Location</span> <a href="http://maps.google.com?q=@item.Location">Open in map</a>
+                    @if (!String.IsNullOrWhiteSpace(@item.Location))
+                    {
+                        <span class="label label-default">@item.Location</span> <a href="http://maps.google.com?q=@item.Location">Open in map</a>
+                    }
                     <br />
                     <i>@Html.Raw(@item.Description)</i>
                     <br />
