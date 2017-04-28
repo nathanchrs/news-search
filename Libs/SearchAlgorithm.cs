@@ -53,6 +53,142 @@ namespace news_search.Libs
             return fail;
         }
 
+
+        public static int[] BuildLast(String pattern)
+        {
+            int[] last = new int[256];
+            for (int i = 0; i < 256; i++)
+            {
+                last[i] = -1;
+            }
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                if ((pattern[i] >= 97 && pattern[i] <= 122))
+                {
+                    last[pattern[i]] = i;
+                    last[pattern[i] - 32] = i;
+                }
+                else if (pattern[i] >= 65 && pattern[i] <= 90)
+                {
+                    last[pattern[i]] = i;
+                    last[pattern[i] + 32] = i;
+                }
+                else
+                {
+                    last[pattern[i]] = i;
+                }
+            }
+            return last;
+        }
+        public static int BmMatch(String text, String pattern)
+        {
+            int[] last = BuildLast(pattern);
+            int n = text.Length;
+            int m = pattern.Length;
+            int i = m - 1;
+            if (i > n - 1)
+            {
+                return -1;
+            }
+            int j = m - 1;
+            do
+            {
+                if (pattern[j] >= 65 && pattern[j] <= 90)
+                {
+                    if ((pattern[j] == text[i]) || pattern[j] + 32 == text[i])
+                    {
+                        if (j == 0)
+                        {
+                            return i;
+                        }
+                        else
+                        {
+                            i--;
+                            j--;
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Console.WriteLine(i);
+                            int lastoccur = last[text[i]];
+                            i = i + m - Math.Min(j, 1 + lastoccur);
+                            j = m - 1;
+                        }
+                        catch (IndexOutOfRangeException e)
+                        {
+                            i--;
+                            j--;
+                        }
+                    }
+                }
+                else if (pattern[j] >= 97 && pattern[j] <= 122)
+                {
+                    if ((pattern[j] == text[i]) || pattern[j] - 32 == text[i])
+                    {
+                        if (j == 0)
+                        {
+                            return i;
+                        }
+                        else
+                        {
+                            i--;
+                            j--;
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Console.WriteLine(i);
+                            int lastoccur = last[text[i]];
+                            i = i + m - Math.Min(j, 1 + lastoccur);
+                            j = m - 1;
+                        }
+                        catch (IndexOutOfRangeException e)
+                        {
+                            i--;
+                            j--;
+                        }
+                    }
+                }
+                else
+                {
+                    if (pattern[j] == text[i])
+                    {
+                        if (j == 0)
+                        {
+                            return i;
+                        }
+                        else
+                        {
+                            i--;
+                            j--;
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Console.WriteLine(i);
+                            int lastoccur = last[(int)text[i]];
+                            i = i + m - Math.Min(j, 1 + lastoccur);
+                            j = m - 1;
+                        }
+                        catch (IndexOutOfRangeException e)
+                        {
+                            i--;
+                            j--;
+                        }
+                    }
+
+                }
+            } while (i <= n - 1);
+            return -1; 
+        }
+
+        /*
         private static int[] BuildLast(String pattern) {
             int[] last = new int[128];
             for (int i = 0; i < 128; i++) {
@@ -65,7 +201,7 @@ namespace news_search.Libs
 
             return last;
         }
-        /*
+        
         private static void BadCharHeuristic(string str, int size, ref int[] badChar)
         {
             int i;
@@ -116,7 +252,7 @@ namespace news_search.Libs
             }
            
         }
-        */
+        
 
         private static int BmMatch(String text, String pattern) {
             int[] last = BuildLast(pattern);
@@ -138,15 +274,24 @@ namespace news_search.Libs
                             j--;
                         }
                     } else {
-                        int lo = last[text[i]];
-                        i = i + m - Math.Min(j, 1 + lo);
-                        j = m - 1;
+                        try
+                        {
+                            int lo = last[text[i]];
+                            i = i + m - Math.Min(j, 1 + lo);
+                            j = m - 1;
+                        } catch(IndexOutOfRangeException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                        
+                        
                     }
                 } while (i <= n - 1);
 
                 return -1;
             }
         }
+        */
 
         public static int RegexMatch(String text, String pattern) {
             /*string patternRegex = string.Empty;
